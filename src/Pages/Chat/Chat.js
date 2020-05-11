@@ -12,6 +12,7 @@ export default class Chat extends React.Component {
       isOpenDialogConfirmLogout: false,
       currentPeerUser: null,
       displayedContactSwitchedNotification: [],
+      displayedContacts: [],
     };
     this.currentUserName = localStorage.getItem(LoginString.Name);
     this.currentUserId = localStorage.getItem(LoginString.ID);
@@ -21,7 +22,16 @@ export default class Chat extends React.Component {
     );
 
     this.currentUserMessages = [];
+    this.searchUsers = [];
+    this.notificationMessagesErase = [];
     this.onProfileClick = this.onProfileClick.bind(this);
+    this.getListUser = this.getListUser.bind(this);
+    this.renderListUser = this.renderListUser.bind(this);
+    this.getClassnameforUserandNotification = this.getClassnameforUserandNotification.bind(
+      this
+    );
+    this.notificationErase = this.notificationErase.bind(this);
+    this.updaterenderList = this.updaterenderList.bind(this);
   }
   logout = () => {
     firebase.auth().signOut();
@@ -45,8 +55,124 @@ export default class Chat extends React.Component {
             number: item.number,
           });
         });
+        this.setState({
+          displayedContactSwitchedNotification: this.currentUserMessages,
+        });
       });
+    this.getListUser();
   }
+  getListUser = async () => {
+    const result = await firebase.firestore().collection("users").get();
+    if (result.docs.length > 0) {
+      let listUsers = [];
+      listUsers = [...result.docs];
+      listUsers.forEach((item, index) => {
+        this.searchUsers.push({
+          key: index,
+          documentkey: item.id,
+          id: item.data().id,
+          name: item.data().name,
+          messages: item.data().messages,
+          URL: item.data().URL,
+          description: item.data().description,
+        });
+      });
+      this.setState({
+        isLoading: false,
+      });
+    }
+    this.renderListUser();
+  };
+  getClassnameforUserandNotification = (itemId) => {
+    let number = 0;
+    let className = "";
+    let check = false;
+    if (
+      this.state.currentPeerUser &&
+      this.state.currentPeerUser.id === itemId
+    ) {
+      className = "viewWrapItemFocused";
+    } else {
+      this.state.displayedContactSwitchedNotification.forEach((item) => {
+        if (item.notificationId.length > 0) {
+          if (item.notification === itemId) {
+            check = true;
+            number = item.number;
+          }
+        }
+      });
+      if (check === true) {
+        className = "viewWrapItemNotification";
+      } else {
+        className = "viewWrapItem";
+      }
+    }
+    return className;
+  };
+  notificationErase = (itemId) => {
+    this.state.displayedContactSwitchedNotification.forEach((el) => {
+      if (el.notificationId.length > 0) {
+        if (el.notificationId != itemId) {
+          this.notificationMessagesErase.push({
+            notificationId: el.notificationId,
+            number: el.number,
+          });
+        }
+      }
+    });
+    this.updaterenderList();
+  };
+  updaterenderList = () => {
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(this.currentUserDocumentId)
+      .update({ messages: this.notificationMessagesErase });
+    this.setState({
+      displayedContactSwitchedNotification: this.notificationMessagesErase,
+    });
+  };
+  renderListUser = () => {
+    if (this.searchUsers.length > 0) {
+      let viewListUser = [];
+      let classname = "";
+      this.searchUsers.map((item) => {
+        if (item.id != this.currentUserId) {
+          classname = this.getClassnameforUserandNotification(item.id);
+          viewListUser.push(
+            <button
+              id={item.key}
+              className={classname}
+              onClick={() => {
+                this.notificationErase(item.id);
+                this.setState({ currentPeerUser: item });
+                document.getElementById(item.key).style.backgroundColor =
+                  "#fff";
+                document.getElementById(item.key).style.color = "#fff";
+              }}
+            >
+              <img className="ciewAvatarItem" src={item.URL} alt="" />
+              <div className="viewWrapContentItem">
+                <span className="textItem">{`Name: ${item.name}`}</span>
+              </div>
+              {classname === "viewWrapItemNotification" ? (
+                <div className="notificationparagraph">
+                  <p id={item.key} className="newmessages">
+                    New messages
+                  </p>
+                </div>
+              ) : null}
+            </button>
+          );
+        }
+      });
+      this.setState({
+        displayedContacts: viewListUser,
+      });
+    } else {
+      console.log("No user is Present");
+    }
+  };
   render() {
     return (
       <div className="root">
@@ -63,6 +189,7 @@ export default class Chat extends React.Component {
                 Logout
               </button>
             </div>
+            {this.state.displayedContacts}
           </div>
         </div>
       </div>

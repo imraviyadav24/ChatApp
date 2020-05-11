@@ -46,7 +46,7 @@
 .ProfilePicture {
   width: 45px;
   height: 45px;
-  background-image: url(../../images/nopic.jpg);
+  background-image: url(../../Images/nopic.jpg);
   left: 10px;
   position: absolute;
   cursor: pointer;
@@ -136,6 +136,7 @@
   max-height: 100vh;
   min-height: 90vh;
   height: auto;
+  width: 40vh;
   /* padding-top: 10px; */
   /* padding-bottom: 10px; */
 }
@@ -202,7 +203,7 @@
   height: 50px;
   border-radius: 25px;
   object-fit: cover;
-  background-image: url(../../images/nopic.jpg);
+  background-image: url(../../Images/nopic.jpg);
 }
 
 .viewWrapContentItem {
