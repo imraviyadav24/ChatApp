@@ -3,6 +3,9 @@ import LoginString from "../Login/LoginStrings";
 import firebase from "../../Services/firebase";
 import "./Chat.css";
 import ReactLoading from "react-loading";
+import images from "../../ProjectImages/ProjectImages";
+import ChatBox from "../ChatBox/ChatBox";
+import WelcomeBoard from "../Welcome/Welcome";
 
 export default class Chat extends React.Component {
   constructor(props) {
@@ -23,6 +26,7 @@ export default class Chat extends React.Component {
 
     this.currentUserMessages = [];
     this.searchUsers = [];
+    this.displayedContacts = [];
     this.notificationMessagesErase = [];
     this.onProfileClick = this.onProfileClick.bind(this);
     this.getListUser = this.getListUser.bind(this);
@@ -151,7 +155,57 @@ export default class Chat extends React.Component {
                 document.getElementById(item.key).style.color = "#fff";
               }}
             >
-              <img className="ciewAvatarItem" src={item.URL} alt="" />
+              <img className="viewAvatarItem" src={item.URL} alt="" />
+              <div className="viewWrapContentItem">
+                <span className="textItem">{`Name: ${item.name}`}</span>
+              </div>
+              {classname === "viewWrapItemNotification" ? (
+                <div className="notificationparagraph">
+                  <p id={item.key} className="newmessages">
+                    New messages
+                  </p>
+                </div>
+              ) : null}
+            </button>
+          );
+        }
+      });
+      this.setState({
+        displayedContacts: viewListUser,
+      });
+    } else {
+      console.log("No user is Present");
+    }
+  };
+  searchHandler = (event) => {
+    let searchQuery = event.target.value.toLowerCase(),
+      displayedContacts = this.searchUsers.filter((el) => {
+        let SearchValue = el.name.toLowerCase();
+        return SearchValue.indexOf(searchQuery) !== -1;
+      });
+    this.displayedContacts = displayedContacts;
+    this.displaySearchedContacts();
+  };
+  displaySearchedContacts = () => {
+    if (this.searchUsers.length > 0) {
+      let viewListUser = [];
+      let classname = "";
+      this.displayedContacts.map((item) => {
+        if (item.id != this.currentUserId) {
+          classname = this.getClassnameforUserandNotification(item.id);
+          viewListUser.push(
+            <button
+              id={item.key}
+              className={classname}
+              onClick={() => {
+                this.notificationErase(item.id);
+                this.setState({ currentPeerUser: item });
+                document.getElementById(item.key).style.backgroundColor =
+                  "#fff";
+                document.getElementById(item.key).style.color = "#fff";
+              }}
+            >
+              <img className="viewAvatarItem" src={item.URL} alt="" />
               <div className="viewWrapContentItem">
                 <span className="textItem">{`Name: ${item.name}`}</span>
               </div>
@@ -189,7 +243,28 @@ export default class Chat extends React.Component {
                 Logout
               </button>
             </div>
+            <div className="rootsearchbar">
+              <div className="input-container">
+                <i class="fa fa-search icon"></i>
+                <input
+                  class="input-field"
+                  type="text"
+                  onChange={this.searchHandler}
+                  placeholder="Search"
+                />
+              </div>
+            </div>
             {this.state.displayedContacts}
+          </div>
+          <div className="viewBoard">
+            {this.state.currentPeerUser ? (
+              <ChatBox />
+            ) : (
+              <WelcomeBoard
+                currentUserName={this.currentUserName}
+                currentUserPhoto={this.currentUserPhoto}
+              />
+            )}
           </div>
         </div>
       </div>

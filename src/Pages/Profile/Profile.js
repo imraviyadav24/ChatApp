@@ -30,6 +30,11 @@ export default class Profile extends React.Component {
       name: event.target.value,
     });
   };
+  onChangeAboutMe = (event) => {
+    this.setState({
+      aboutMe: event.target.value,
+    });
+  };
   onChangeAvatar = (event) => {
     if (event.target.files && event.target.files[0]) {
       const prefixFiletype = event.target.files[0].type.toString();
@@ -46,19 +51,19 @@ export default class Profile extends React.Component {
   uploadAvatar = () => {
     this.setState({ isLoading: true });
     if (this.newPhoto) {
-      const uploaddTask = firebase
+      const uploadTask = firebase
         .storage()
         .ref()
         .child(this.state.id)
         .put(this.newPhoto);
-      uploaddTask.on(
+      uploadTask.on(
         LoginString.UPLOAD_CHANGED,
         null,
         (err) => {
           this.props.showToast(0, err.message);
         },
         () => {
-          uploaddTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+          uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
             this.updateUserInfo(true, downloadURL);
           });
         }
@@ -87,7 +92,7 @@ export default class Profile extends React.Component {
         .update(newinfo)
         .then((data) => {
           localStorage.setItem(LoginString.Name, this.state.name);
-          localStorage.setItem(LoginString.description, this.state.aboutMe);
+          localStorage.setItem(LoginString.Description, this.state.aboutMe);
           if (isUpdatedPhotoURL) {
             localStorage.setItem(LoginString.PhotoURL, downloadURL);
           }
@@ -102,7 +107,7 @@ export default class Profile extends React.Component {
         <div className="headerprofile">
           <span>PROFILE</span>
         </div>
-        <img className="avatar" alt="" src={this.state.PhotoUrl} />
+        <img className="avatar" alt="" src={this.state.photoUrl} />
         <div className="viewWrapInputFile">
           <img
             className="imgInputFile"
