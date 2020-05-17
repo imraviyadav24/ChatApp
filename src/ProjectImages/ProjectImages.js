@@ -5,7 +5,7 @@ const Images = {
   input_file: require("../Images/photo.jpg"),
   sticker: require("../Images/attach.png"),
   send: require("../Images/download.png"),
-  wave_hand: require("../images/14-wave_hand.png"),
+  wave_hand: require("../Images/14-wave_hand.png"),
   lego1: require("../Images/lego1.png"),
   lego2: require("../Images/lego2.png"),
   lego3: require("../Images/lego3.jpg"),

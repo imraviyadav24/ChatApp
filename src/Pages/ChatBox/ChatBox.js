@@ -4,7 +4,7 @@ import ReactLoading from "react-loading";
 import "react-toastify/dist/ReactToastify.css";
 import firebase from "../../Services/firebase";
 import images from "../../ProjectImages/ProjectImages";
-import moment from "react-moment";
+import * as moment from "moment";
 import "./ChatBox.css";
 import LoginString from "../Login/LoginStrings";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -52,6 +52,11 @@ export default class ChatBox extends React.Component {
   componentDidMount() {
     this.getListHistory();
   }
+  componentWillUnount() {
+    if (this.removeListener) {
+      this.removeListener();
+    }
+  }
   getListHistory = () => {
     this.listMessage.length = 0;
     this.setState({ isLoading: true });
@@ -69,17 +74,19 @@ export default class ChatBox extends React.Component {
       .collection("Messages")
       .doc(this.groupChatId)
       .collection(this.groupChatId)
-      .onSnapshot((Snapshot) => {
-        Snapshot.docChanges().forEach((change) => {
-          if (change.type === LoginString.DOC) {
-            this.listMessage.push(change.doc.data());
-          }
-        });
-        this.setState({ isLoading: false });
-      });
-    (err) => {
-      this.props.showToast(0, err.toString());
-    };
+      .onSnapshot(
+        (Snapshot) => {
+          Snapshot.docChanges().forEach((change) => {
+            if (change.type === LoginString.DOC) {
+              this.listMessage.push(change.doc.data());
+            }
+          });
+          this.setState({ isLoading: false });
+        },
+        (err) => {
+          this.props.showToast(0, err.toString());
+        }
+      );
   };
   onSendMessage = (content, type) => {
     let notificationMessages = [];
@@ -330,7 +337,7 @@ export default class ChatBox extends React.Component {
                 {this.isLastMessageLeft(index) ? (
                   <span className="textTimeLeft">
                     <div className="time">
-                      {moment(number(item.timestamp)).formate("11")}
+                      {moment(Number(item.timestamp)).formate("11")}
                     </div>
                   </span>
                 ) : null}
